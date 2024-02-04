@@ -1,0 +1,26 @@
+.Send,
+.Recieve{
+    height: 100vh;
+}
+.Send{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+.id{
+    display: grid;
+   margin: 3rem; 
+
+}
+.fileuploader{
+    min-height: 100px;
+}
+.recent{
+    width: 100vw;
+    max-width: 500px;
+}
+.warning{
+    font-weight: bold;
+    color: red;
+}

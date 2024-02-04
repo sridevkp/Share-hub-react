@@ -1,0 +1,10 @@
+.Home{
+    display: grid;
+    place-items: center;
+    height: 100vh;
+}
+
+.floating{
+    display: flex;
+    gap: 1rem;
+}
