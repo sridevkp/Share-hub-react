@@ -3,8 +3,9 @@ import './Home.css';
 import { Fab, Tooltip } from '@mui/material';
 import GetAppIcon from '@mui/icons-material/GetApp';
 import UploadIcon from '@mui/icons-material/Upload';
+// import { Button, Dialog, DialogTitle, DialogActions, DialogContent, TextField} from '@mui/material';
 
-function Home() {
+function Home({ setTopBarProgress }) {
   return (
     <div className="Home">
       <div className='floating'>

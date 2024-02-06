@@ -1,12 +1,11 @@
 .Send,
 .Recieve{
     height: 100vh;
-}
-.Send{
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 1rem;
+    padding-top: 1rem;
 }
 .id{
     display: grid;
@@ -19,8 +18,27 @@
 .recent{
     width: 100vw;
     max-width: 500px;
+    display: grid;
 }
 .warning{
     font-weight: bold;
     color: red;
+}
+.container{
+    width: 100%;
+    display: grid; 
+    padding: 1rem;
+    gap: 1rem;
+    box-sizing: border-box;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+
+}
+.file{
+    padding-bottom: 1rem;
+    color: whitesmoke;
+    background-color: rgb(27, 27, 27);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+    display: grid;
+    place-items: center;
 }
