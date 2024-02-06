@@ -41,4 +41,6 @@
     border-radius: 5px;
     display: grid;
     place-items: center;
+    text-wrap: nowrap;
+    overflow: hidden;
 }

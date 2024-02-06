@@ -3,13 +3,37 @@ import './Home.css';
 import { Fab, Tooltip } from '@mui/material';
 import GetAppIcon from '@mui/icons-material/GetApp';
 import UploadIcon from '@mui/icons-material/Upload';
-// import { Button, Dialog, DialogTitle, DialogActions, DialogContent, TextField} from '@mui/material';
+import { Button, Dialog, DialogTitle, DialogActions, DialogContent, TextField} from '@mui/material';
+import { useState } from 'react';
 
 function Home({ setTopBarProgress }) {
+  const [ id, setId ] = useState("")
+  const [ open, setOpen ] = useState(false)
+  const URL = "http://localhost:3000/recieve/"
+
   return (
     <div className="Home">
       <div className='floating'>
-
+        <Dialog
+          open={open}
+          onClose={() => setOpen(false)}
+        >
+          <DialogTitle>Enter Room Id</DialogTitle>
+          <DialogContent>
+            <TextField
+              autoFocus
+              margin="dense"
+              id="id"
+              fullWidth
+              variant="standard"
+              onChange={ e => setId( e.target.value )}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Link to={URL+id}><Button>Recieve</Button></Link>
+          </DialogActions>
+        </Dialog>
+      
         <Tooltip title="Send File">
           <Link to="send">
             <Fab color='primary' size='large' >
@@ -19,11 +43,9 @@ function Home({ setTopBarProgress }) {
         </Tooltip>
         
         <Tooltip title="Recieve File">
-          <Link to="recieve" >
-            <Fab color='primary' size='large'>
+            <Fab color='primary' size='large' onClick={ () => setOpen(true) }>
               <GetAppIcon/>
             </Fab>
-          </Link>
         </Tooltip>
 
       </div>

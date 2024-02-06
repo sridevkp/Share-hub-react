@@ -6,7 +6,7 @@ const File = ({ name, progress }) => {
     return (
         <div className="file">
             <p>{name}</p>
-            <CircularProgress variant="determinate" value={progress} />
+            <CircularProgress variant="determinate" value={Math.min(progress,100)} />
         </div>
     )
 }
