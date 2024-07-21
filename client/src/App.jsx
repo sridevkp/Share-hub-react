@@ -1,17 +1,15 @@
 import React, { useState } from 'react';
-import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Home from './Home';
 import SendPage from './components/Send';
 import LoadingBar from 'react-top-loading-bar'
 import RecievePage from './components/Recieve';
-import './index.css'
 
-
-function App(){
+function App() {
   const [ progress, setTopBarProgress ] = useState(0)
-  return(
-    <>
+
+  return (
+    <BrowserRouter>
        <LoadingBar
          color='blue'
          height={3}
@@ -26,17 +24,8 @@ function App(){
          <Route exact path='/recieve/:id' element={<RecievePage setTopBarProgress={setTopBarProgress}/>} />
 
        </Routes>       
-    </>
-    
+    </BrowserRouter>
   )
 }
 
-
-
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <BrowserRouter>
-    <App/>
-  </BrowserRouter>
-);
-
+export default App

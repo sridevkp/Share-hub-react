@@ -6,39 +6,39 @@ const PORT = 8080
 const httpServer = http.createServer();
 const io = new Server(httpServer, {
   cors :{
-    origin: "http://localhost:3000",
+    origin: "http://localhost:5173",
     methods: ["GET","POST"]
   }
 });
 
+const users = new Map();
+
+
+function handleLeave(){
+    console.log( `${this.id} disconnected`)
+    this.broadcast.emit( "reciever-exit", {})
+    users.delete(this.id)
+}
+
 io.on("connection", (socket) => {
-    socket.on("join-room", ( room, cb ) => {
-        socket.join( room )
-        console.log( socket.id + " connected to " + room )
-        if( cb ) cb()
+    users.set(socket.id, socket.id);
 
-        const handleLeave = () => {
-            console.log( socket.id + " disconnected from " + room )
-            socket.to(room).emit( "reciever-exit", {})
-        }
+    socket.on("get:id", cb => {
+        cb && cb( socket.id )
+    })
 
-        socket.on("disconnect", handleLeave )
-        socket.on("exit-room", handleLeave )
-    })
-    
-    
-    socket.on("file-meta", ( data, room ) => {
-        console.log( "file meta in " + room)
-        socket.to( room ).emit( "file-meta", data )
-    })
-    socket.on("file-share", ( data, room )  => {
-        console.log( "file share in " + room)
-        socket.to( room ).emit( "file-share", data )
-    })
-    socket.on("file-raw", ( data, room ) => {
-        console.log( "file raw in " + room)
-        socket.to( room ).emit( "file-raw", data )
-    })
+    socket.on('outgoing:offer', data => {
+        const { fromOffer, to } = data;
+        if( !users.get(to) ) return ;
+        socket.to(to).emit('incomming:offer', { from: socket.id, offer: fromOffer });
+   });
+
+    socket.on('offer:accepted', data => {
+        const { answere, to } = data;
+        socket.to(to).emit('incomming:answer', { from: socket.id, offer: answere })
+    });
+
+    socket.on('disconnect', handleLeave );
 });
 
 httpServer.listen( PORT );

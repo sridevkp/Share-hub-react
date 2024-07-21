@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import './Home.css';
 import { Fab, Tooltip } from '@mui/material';
 import GetAppIcon from '@mui/icons-material/GetApp';
 import UploadIcon from '@mui/icons-material/Upload';
@@ -9,16 +8,16 @@ import { useState } from 'react';
 function Home({ setTopBarProgress }) {
   const [ id, setId ] = useState("")
   const [ open, setOpen ] = useState(false)
-  const URL = "http://localhost:3000/recieve/"
+  const URL = "/recieve/"
 
   return (
-    <div className="Home">
+    <div className="home">
       <div className='floating'>
         <Dialog
           open={open}
           onClose={() => setOpen(false)}
         >
-          <DialogTitle>Enter Room Id</DialogTitle>
+          <DialogTitle>Enter Sender Id</DialogTitle>
           <DialogContent>
             <TextField
               autoFocus

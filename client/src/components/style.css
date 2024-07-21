@@ -1,0 +1,43 @@
+.Send,
+.Recieve{
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding-top: 1rem;
+}
+.id{
+    display: grid;
+   margin: 3rem; 
+
+}
+.fileuploader{
+    min-height: 100px;
+}
+.recent{
+    width: 100vw;
+    max-width: 500px;
+    display: grid;
+}
+.warning{
+    font-weight: bold;
+    color: red;
+}
+table{
+    margin: 2rem 0;
+    padding: 0 2rem;
+    text-align: left;
+    font-family: monospace;
+    font-size: large;
+
+    th{
+        border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+        padding-bottom: .7rem;
+    }
+
+    th:last-child,
+    td:last-child{
+        text-align :right ;
+    }
+}
