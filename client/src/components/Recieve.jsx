@@ -17,12 +17,11 @@ const RecievePage = ({ setTopBarProgress }) => {
     const { id } = useParams()
 
     useEffect( () => {
-        createOffer( id ) ;
+        socket.emit('id:sender', id)
 
         function onDataChannel(evt) {
             console.log("Data channel created from remote");
             const channel = evt.channel;
-            channel.send("receiving");
 
             const receivingFile = {
                 buffer : [],
@@ -43,18 +42,25 @@ const RecievePage = ({ setTopBarProgress }) => {
                 receivingFile.buffer.push(evt.data);
             }
         }
-        
-        const handleIncomingAnswer = async data => {
-            const { offer } = data;
-            console.log("Answer received");
-            await peer.setRemoteDescription(new RTCSessionDescription(offer));
-        }
 
-        socket.on('incomming:answer', handleIncomingAnswer );
+        const handleIncomingOffer = async data => {
+            console.log("Ïncoming offer");
+            const { from, offer } = data;
+            await peer.setRemoteDescription(new RTCSessionDescription(offer));
+            
+            console.log(`Creating answer and accepting offer ${peer.signalingState}`)
+            const answereOffer = await peer.createAnswer();
+            await peer.setLocalDescription(new RTCSessionDescription(answereOffer));
+            socket.emit('offer:accepted', { answere: answereOffer, to: from });
+            
+        }
+        
+        
+        socket.on('incomming:offer', handleIncomingOffer)
         peer.addEventListener('datachannel', onDataChannel);
 
         return () => {
-            socket.off('incomming:answer', handleIncomingAnswer );
+            socket.off('incomming:offer', handleIncomingOffer);
             peer.removeEventListener('datachannel', onDataChannel);
         };
         
@@ -69,13 +75,6 @@ const RecievePage = ({ setTopBarProgress }) => {
             clearTimeout( timer )
         }
     },[setTopBarProgress])
-
-    const createOffer = async to => {
-        console.log(`Creating offer ${peer.signalingState}`);
-        const localOffer = await peer.createOffer();
-        await peer.setLocalDescription(new RTCSessionDescription(localOffer));
-        socket.emit('outgoing:offer', { fromOffer: localOffer, to })
-    }
 
     return (
         <div className="Recieve">   

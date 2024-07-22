@@ -1,7 +1,7 @@
-const http = require("http")
-const {Server} = require("socket.io")
+const http = require("http");
+const {Server} = require("socket.io");
 
-const PORT = 8080
+const PORT = 8080 ;
 
 const httpServer = http.createServer();
 const io = new Server(httpServer, {
@@ -16,15 +16,19 @@ const users = new Map();
 
 function handleLeave(){
     console.log( `${this.id} disconnected`)
-    this.broadcast.emit( "reciever-exit", {})
+    this.broadcast.emit( 'reciever-exit', {})
     users.delete(this.id)
 }
 
-io.on("connection", (socket) => {
+io.on('connection', (socket) => {
     users.set(socket.id, socket.id);
 
-    socket.on("get:id", cb => {
+    socket.on('id:self', cb => {
         cb && cb( socket.id )
+    })
+
+    socket.on('id:sender', to => {
+        socket.to(to).emit('id:receiver', socket.id );
     })
 
     socket.on('outgoing:offer', data => {

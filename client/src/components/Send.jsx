@@ -18,28 +18,26 @@ const MAX_BUFFER_AMOUNT = 64 * 1024;
 const SendPage = ({ setTopBarProgress }) => {
     const [ id, setId ] = useState("");
     const [ recent, setRecent ] = useState([]);
-    const reciever = true ;
+    const [ reciever, setReceiver] = useState() ;
 
     useEffect( () => {
-        socket.emit("get:id", id => {
+        socket.emit("id:self", id => {
             setId( id );
         }) 
 
-        const handleIncomingOffer = async data => {
-            console.log("Ïncoming offer");
-            const { from, offer } = data;
+        socket.on('id:receiver', receiverid => createOffer( receiverid ) );
+
+        const handleIncomingAnswer = async data => {
+            const { offer } = data;
+            console.log("Answer received",offer);
+            setReceiver( offer );
             await peer.setRemoteDescription(new RTCSessionDescription(offer));
-            
-            console.log(`Creating answer and accepting offer ${peer.signalingState}`)
-            const answereOffer = await peer.createAnswer();
-            await peer.setLocalDescription(new RTCSessionDescription(answereOffer));
-            socket.emit('offer:accepted', { answere: answereOffer, to: from });
-            
         }
+
+        socket.on('incomming:answer', handleIncomingAnswer );
         
-        socket.on('incomming:offer', handleIncomingOffer)
         return () => {
-            socket.off('incomming:offer', handleIncomingOffer);
+            socket.off('incomming:answer', handleIncomingAnswer );
         };
     },[])
 
@@ -54,10 +52,10 @@ const SendPage = ({ setTopBarProgress }) => {
     },[setTopBarProgress])   
 
     function readAndSendFileChunks({ file, metadata }){
+        console.log("Channel created");
         const channel = peer.createDataChannel( file.name );
-        console.log("Channel created",channel);
         channel.onopen = () => {
-            console.log("Channel öpened");
+            console.log("Channel opened");
             setRecent( recent => [ metadata, ...recent ] );
             channel.send( JSON.stringify(metadata) );
             readSlice(0);
@@ -123,6 +121,12 @@ const SendPage = ({ setTopBarProgress }) => {
         readAndSendFileChunks( fileshare );
     }
 
+    const createOffer = async to => {
+        console.log(`Creating offer ${peer.signalingState}`);
+        const localOffer = await peer.createOffer();
+        await peer.setLocalDescription(new RTCSessionDescription(localOffer));
+        socket.emit('outgoing:offer', { fromOffer: localOffer, to })
+    }
 
     const copy = () => {
         navigator.clipboard.writeText( id )
