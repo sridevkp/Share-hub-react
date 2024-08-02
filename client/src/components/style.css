@@ -1,3 +1,10 @@
+*{
+    font-family: monospace;
+}
+body{
+    display: flex;
+    justify-content: center;
+}
 .Send,
 .Recieve{
     height: 100vh;
@@ -6,18 +13,21 @@
     align-items: center;
     gap: 1rem;
     padding-top: 1rem;
+    width: 90vw;
+    max-width: 512px;
+}
+.button-container{
+    display: flex;
+    justify-content: end;
+    width: 100%;
 }
 .id{
     display: grid;
    margin: 3rem; 
 
 }
-.fileuploader{
-    min-height: 100px;
-}
 .recent{
-    width: 100vw;
-    max-width: 500px;
+    width: 100%;
     display: grid;
 }
 .warning{
@@ -28,16 +38,33 @@ table{
     margin: 2rem 0;
     padding: 0 2rem;
     text-align: left;
-    font-family: monospace;
     font-size: large;
+    border-collapse:separate; 
+    border-spacing: 0 12px;
 
     th{
         border-bottom: 1px solid rgba(0, 0, 0, 0.4);
         padding-bottom: .7rem;
+        color: #444444;
     }
 
     th:last-child,
     td:last-child{
         text-align :right ;
     }
+}
+.file-uploader{
+    width: 100%;
+    border-color: var(--accent) !important ;
+}
+.file-uploader path{
+    fill: var(--accent) !important ; 
+}
+.qr-code-container{
+    width: 100%;
+    padding-top: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100px;
 }

@@ -21,6 +21,7 @@ function handleLeave(){
 }
 
 io.on('connection', (socket) => {
+    console.log( `${socket.id} connected`)
     users.set(socket.id, socket.id);
 
     socket.on('id:self', cb => {
@@ -32,15 +33,23 @@ io.on('connection', (socket) => {
     })
 
     socket.on('outgoing:offer', data => {
+        console.log( `${socket.id} offering`)
         const { fromOffer, to } = data;
         if( !users.get(to) ) return ;
         socket.to(to).emit('incomming:offer', { from: socket.id, offer: fromOffer });
    });
 
     socket.on('offer:accepted', data => {
-        const { answere, to } = data;
-        socket.to(to).emit('incomming:answer', { from: socket.id, offer: answere })
+        console.log( `${socket.id} accepting`)
+        const { answer, to } = data;
+        socket.to(to).emit('incomming:answer', { from: socket.id, offer: answer })
     });
+
+    socket.on('send:candidate', data => {
+        console.log( `${socket.id} sending candidate`)
+        const { to, candidate } = data
+        socket.to(to).emit('receive:candidate', { from : socket.id, candidate })
+    })
 
     socket.on('disconnect', handleLeave );
 });

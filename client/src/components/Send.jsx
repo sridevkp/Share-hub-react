@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import QRCode from "react-qr-code";
 
 import { Input, InputAdornment, IconButton } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
@@ -8,9 +9,9 @@ import { nanoid } from 'nanoid';
 import Recent from './Recent';
 
 import socket from '../api/socket';
-import peer from '../api/peer';
 
 import './style.css'
+import {background, text, accent, primary, secondary} from "../theme.json"
 
 const CHUNK_SIZE = 16 * 1024 ;
 const MAX_BUFFER_AMOUNT = 64 * 1024;
@@ -19,25 +20,58 @@ const SendPage = ({ setTopBarProgress }) => {
     const [ id, setId ] = useState("");
     const [ recent, setRecent ] = useState([]);
     const [ reciever, setReceiver] = useState() ;
+    const peer = useRef(null)
 
     useEffect( () => {
-        socket.emit("id:self", id => {
-            setId( id );
-        }) 
+        peer.current = new RTCPeerConnection({
+            iceServers: [
+                { urls: "stun:stun.l.google.com:19302" },
+                { urls: "stun:stun.stunprotocol.org" }
+            ]
+        });
 
-        socket.on('id:receiver', receiverid => createOffer( receiverid ) );
+        socket.emit("id:self", id => setId( id )) 
+
+        socket.on('id:receiver', receiverid => {
+            console.log("Id received from receiver")
+            peer.current.onicecandidate = evt => {
+                if( evt.candidate ){
+                    const candidate = evt.candidate
+                    const to = receiverid;
+                    console.log(`Sending ice candidate to ${to}`);
+                    socket.emit("send:candidate", { to, candidate })
+                }
+            }
+            const channel = peer.current.createDataChannel( "HI" );
+            channel.onopen = () => {
+                channel.send("ping");
+                channel.onmessage = evt => {
+                    console.log( evt.data )
+                }
+            }
+            console.log("Creating channel")
+            createOffer( receiverid ) 
+        });
 
         const handleIncomingAnswer = async data => {
             const { offer } = data;
-            console.log("Answer received",offer);
+            console.log("Answer received");
+            await peer.current.setRemoteDescription(new RTCSessionDescription(offer));
             setReceiver( offer );
-            await peer.setRemoteDescription(new RTCSessionDescription(offer));
+        }
+
+        const onReceiveIceCandidate = data => {
+            console.log("Received ice candidate");
+            peer.current.addIceCandidate( new RTCIceCandidate(data.candidate) );
         }
 
         socket.on('incomming:answer', handleIncomingAnswer );
+        socket.on('receive:candidate', onReceiveIceCandidate);
         
         return () => {
             socket.off('incomming:answer', handleIncomingAnswer );
+            socket.off('receive:candidate', onReceiveIceCandidate);
+            peer.current.close()
         };
     },[])
 
@@ -51,13 +85,27 @@ const SendPage = ({ setTopBarProgress }) => {
         }
     },[setTopBarProgress])   
 
+    const createOffer = async to => {
+        try{
+            console.log(`Creating offer ${peer.current.signalingState}`);
+            const localOffer = await peer.current.createOffer();
+            await peer.current.setLocalDescription(new RTCSessionDescription(localOffer));
+            socket.emit('outgoing:offer', { fromOffer: localOffer, to })
+        }catch(e){
+            console.log("Couldn't create offer")
+        }
+    }
+
     function readAndSendFileChunks({ file, metadata }){
         console.log("Channel created");
-        const channel = peer.createDataChannel( file.name );
+        const channel = peer.current.createDataChannel( file.name );
         channel.onopen = () => {
             console.log("Channel opened");
-            setRecent( recent => [ metadata, ...recent ] );
             channel.send( JSON.stringify(metadata) );
+            setRecent( prev => {
+                    prev.push(metadata);
+                    return prev;
+                } );
             readSlice(0);
         } ;
 
@@ -86,6 +134,7 @@ const SendPage = ({ setTopBarProgress }) => {
             } else {
                 console.log('File sent successfully');
                 channel.send('EOF'); 
+                channel.close();
             }
         };
 
@@ -121,13 +170,6 @@ const SendPage = ({ setTopBarProgress }) => {
         readAndSendFileChunks( fileshare );
     }
 
-    const createOffer = async to => {
-        console.log(`Creating offer ${peer.signalingState}`);
-        const localOffer = await peer.createOffer();
-        await peer.setLocalDescription(new RTCSessionDescription(localOffer));
-        socket.emit('outgoing:offer', { fromOffer: localOffer, to })
-    }
-
     const copy = () => {
         navigator.clipboard.writeText( id )
     }
@@ -141,6 +183,7 @@ const SendPage = ({ setTopBarProgress }) => {
                     type="text"
                     value={id}
                     readOnly
+                    sx={{ color: text, path : { fill : text } }}
                     endAdornment={
                     <InputAdornment position="end">
                         <IconButton onClick={copy}>
@@ -149,19 +192,23 @@ const SendPage = ({ setTopBarProgress }) => {
                     </InputAdornment>
                     }
                 />
+                <div className="qr-code-container">
+                    <QRCode 
+                        className='qr-code' 
+                        fgColor= {text}
+                        bgColor= {background}
+                        size={128} 
+                        value={`${location.origin}/recieve/${id}`} 
+                    />
+                </div>
 
             </div>
 
              <FileUploader 
-                disabled={reciever==null} 
                 handleChange={handleChange} 
                 name="file" 
-                classes="fileuploader"
-                children={
-                    reciever==null&&
-                    <p className='warning'>Waiting for reciever...</p>
-                    
-                }/>
+                classes="file-uploader"
+            />
             <Recent recent={recent}/>
             
         </div>

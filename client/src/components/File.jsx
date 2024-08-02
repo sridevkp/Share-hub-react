@@ -7,10 +7,10 @@ const File = ({ sl, name, size, progress }) => {
         name;
 
     const formatFileSize = bytes => {
-        const sizes = ['Bytes', 'kb', 'mb', 'gb', 'tb'];
+        const sizes = ['B', 'Kb', 'Mb', 'Gb', 'Tb'];
         if (bytes === 0) return '0 Bytes';
         const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
-        return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
+        return `${(bytes / Math.pow(1024, i)).toFixed(1)}${sizes[i]}`;
     }
 
     return (
