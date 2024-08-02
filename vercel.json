@@ -1,8 +1,7 @@
 {
     "routes": [
-      {
-        "src": "/[^.]+",
-        "dest": "/"
-      }
+      { "src": "/", "dest": "/" },
+      { "src": "/send", "dest": "/" },
+      { "src": "/receive", "dest": "/" }
     ]
 }
