@@ -1,7 +1,5 @@
 {
-    "routes": [
-      { "src": "/", "dest": "/" },
-      { "src": "/send", "dest": "/" },
-      { "src": "/receive", "dest": "/" }
-    ]
+  "routes": [
+    { "src": "/[^.]+", "dest": "/", "status": 200 }
+  ]
 }
