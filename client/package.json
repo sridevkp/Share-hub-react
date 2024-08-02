@@ -1,6 +1,6 @@
 {
   "name": "share-hub",
-  "homepage": ".",
+  "homepage": "https://share-hub-eight.vercel.app/",
   "private": true,
   "version": "0.0.0",
   "type": "module",
